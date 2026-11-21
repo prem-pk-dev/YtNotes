@@ -129,7 +129,8 @@
 
   function buildPack() {
     if (!transcript.length) return;
-    const clean = transcript.map((s,i) => ({time:Number(s.time)||i*8,text:String(s.text||'').replace(/\s+/g,' ').trim()})).filter(s => s.text.length > 8);
+    const clean = transcript.map((s,i) => ({time:Number.isFinite(Number(s.time)) ? Math.max(0,Number(s.time)) : i*8,text:String(s.text||'').replace(/\s+/g,' ').trim()})).filter(s => s.text.length > 1);
+    if (!clean.length) { const status=$('#status'); if(status) status.textContent='Transcript has no usable text. Try pasting the transcript again.'; return; }
     const sentences = [];
     let buffer = '', bufferTime = 0;
     clean.forEach(seg => {
