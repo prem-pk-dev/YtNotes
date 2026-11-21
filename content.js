@@ -18,6 +18,7 @@
   let resumeAfterSave = false;
   let focusHidden = [];
   let clockVideo = null;
+  let clockHandler = null;
 
   const $ = (selector, scope = shadow) => scope.querySelector(selector);
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -263,12 +264,16 @@
   }
   function bindClock() {
     const video = currentVideo();
-    if (video && video !== clockVideo) {
-      clockVideo = video;
-      video.addEventListener('timeupdate', () => {
+    if (video === clockVideo) return;
+    if (clockVideo && clockHandler) clockVideo.removeEventListener('timeupdate', clockHandler);
+    clockVideo = video || null;
+    clockHandler = null;
+    if (video) {
+      clockHandler = () => {
         const el = $('#ytsnp-time-label');
-        if (el) el.textContent = formatTime(video.currentTime);
-      });
+        if (el && video === currentVideo()) el.textContent = formatTime(video.currentTime);
+      };
+      video.addEventListener('timeupdate', clockHandler);
     }
   }
   async function handleNavigation() {
