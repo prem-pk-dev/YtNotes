@@ -16,7 +16,8 @@
   let rootHost, shadow, panel, body, list, editor, textarea, statusNode;
   let lastUrl = location.href;
   let resumeAfterSave = false;
-  let focusHidden = [];\n  let clockVideo = null;
+  let focusHidden = [];
+  let clockVideo = null;
 
   const $ = (selector, scope = shadow) => scope.querySelector(selector);
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
