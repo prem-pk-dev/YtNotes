@@ -141,11 +141,11 @@
     if (settings.focusMode) {
       selectors.forEach(selector => document.querySelectorAll(selector).forEach(el => {
         if (el.closest('#ytsnp-root')) return;
-        if (!focusHidden.some(x => x.el === el)) focusHidden.push({ el, display: el.style.display });
+        if (!focusHidden.some(x => x.el === el)) focusHidden.push({ el, display: el.style.getPropertyValue('display'), priority: el.style.getPropertyPriority('display') });
         el.style.setProperty('display', 'none', 'important');
       }));
     } else {
-      focusHidden.forEach(({el, display}) => { if (el?.isConnected) { if (display) el.style.setProperty('display', display); else el.style.removeProperty('display'); } });
+      focusHidden.forEach(({el, display, priority}) => { if (el?.isConnected) { if (display) el.style.setProperty('display', display, priority || ''); else el.style.removeProperty('display'); } });
       focusHidden = [];
     }
   }
