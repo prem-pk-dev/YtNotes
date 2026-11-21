@@ -31,3 +31,19 @@ Notes and screenshots stay in Chrome local extension storage on this device. The
 
 ## Development
 No build tools are required. Reload the extension from `chrome://extensions` after editing files. Content UI styles are isolated in Shadow DOM; `styles.css` is intentionally minimal because the panel ships its scoped styles in the shadow root.
+
+## Local Study Assistant
+
+The extension now includes a separate **Study Assistant** launcher on YouTube watch pages.
+
+- Loads transcript segments from YouTube's visible transcript panel when available.
+- Supports manual transcript paste if YouTube does not expose its transcript UI.
+- Builds an offline, extractive study pack: short summary, key points with timestamps, approximate topic chapters, practice keyword questions, and revision flashcards.
+- Exports the study pack as Markdown or TXT, or opens a print dialog that can save as PDF.
+- Saves generated study packs locally per video using `chrome.storage.local`.
+
+### Important accuracy note
+
+This first version does not call an AI model and does not claim generative AI. Its summaries, questions, and flashcards are produced locally from transcript text using lightweight text scoring and extraction. Chapters are approximate time buckets, not official YouTube chapters. Videos without accessible captions require a pasted transcript. No paid API, server, or account is used.
+
+After pulling updates, open `chrome://extensions` and click **Reload** for YT Study Notes Pro, then refresh the YouTube watch tab.
