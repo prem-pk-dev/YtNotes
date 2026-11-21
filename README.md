@@ -34,11 +34,11 @@ No build tools are required. Reload the extension from `chrome://extensions` aft
 
 ## Local Study Assistant
 
-The extension now includes a separate **Study Assistant** launcher on YouTube watch pages.
+The extension now includes a separate **Study Assistant** launcher on YouTube watch pages. Click the launcher to open it; it stays collapsed until requested so it does not cover the original timestamped-notes panel.
 
 - Loads transcript segments from YouTube's visible transcript panel when available.
 - Supports manual transcript paste if YouTube does not expose its transcript UI.
-- Builds an offline, extractive study pack: short summary, key points with timestamps, approximate topic chapters, practice keyword questions, and revision flashcards.
+- Builds an offline, extractive study pack: short summary, key points with timestamps, approximate topic chapters, practice keyword questions, and revision flashcards. Keyword extraction supports English and Unicode-script transcripts including Hindi.
 - Exports the study pack as Markdown or TXT, or opens a print dialog that can save as PDF.
 - Saves generated study packs locally per video using `chrome.storage.local`.
 
