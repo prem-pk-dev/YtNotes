@@ -174,7 +174,14 @@
       return {front:'Explain: ' + term,back:p.text,time:p.time};
     });
     artifacts = {videoId:getId(),title:getTitle(),createdAt:Date.now(),summary,keyPoints,chapters,quiz,cards,transcript:clean};
-    saveArtifacts().then(() => { activeTab='overview'; drawTab(); });
+    const packId = artifacts.videoId;
+    saveArtifacts().then(saved => {
+      if (videoId !== packId) return;
+      activeTab='overview';
+      drawTab();
+      const status = $('#status');
+      if (status) status.textContent = saved ? 'Study pack saved locally for this video.' : 'Study pack is ready, but local saving failed. Check extension storage space.';
+    });
   }
 
   function trimTitle(text) {
