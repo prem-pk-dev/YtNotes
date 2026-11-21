@@ -79,7 +79,7 @@
       .ytsnp-brand{font-weight:750;font-size:14px;letter-spacing:-.2px;flex:1}.ytsnp-sub{color:var(--ytsnp-muted);font-size:11px;margin-top:2px;max-width:245px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .ytsnp-iconbtn{border:1px solid var(--ytsnp-border);background:transparent;color:var(--ytsnp-text);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px}
       .ytsnp-content{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:11px}
-      .ytsnp-actions{display:flex;gap:7px;flex-wrap:wrap}.ytsnp-btn{border:1px solid var(--ytsnp-border);background:var(--ytsnp-card);color:var(--ytsnp-text);border-radius:9px;padding:8px 10px;font:600 12px inherit;cursor:pointer}.ytsnp-btn.primary{background:var(--ytsnp-accent);color:white;border-color:var(--ytsnp-accent)}.ytsnp-btn:disabled{opacity:.45;cursor:not-allowed}
+      .ytsnp-actions{display:flex;gap:7px;flex-wrap:wrap}.ytsnp-btn{border:1px solid var(--ytsnp-border);background:var(--ytsnp-card);color:var(--ytsnp-text);border-radius:9px;padding:8px 10px;font:600 12px Inter,Roboto,sans-serif;cursor:pointer}.ytsnp-btn.primary{background:var(--ytsnp-accent);color:white;border-color:var(--ytsnp-accent)}.ytsnp-btn:disabled{opacity:.45;cursor:not-allowed}
       .ytsnp-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.ytsnp-toggle{display:flex;align-items:center;gap:7px;color:var(--ytsnp-muted);font-size:12px}.ytsnp-toggle input{accent-color:var(--ytsnp-accent)}
       .ytsnp-field{width:100%;box-sizing:border-box;border:1px solid var(--ytsnp-border);background:var(--ytsnp-bg);color:var(--ytsnp-text);border-radius:10px;padding:10px;font:13px inherit;outline:none}.ytsnp-field:focus{border-color:var(--ytsnp-accent)}textarea.ytsnp-field{min-height:86px;resize:vertical;line-height:1.5}
       .ytsnp-compose{display:flex;flex-direction:column;gap:8px}.ytsnp-shot{font-size:11px;color:var(--ytsnp-muted)}.ytsnp-note{padding:10px;border:1px solid var(--ytsnp-border);border-radius:11px;background:var(--ytsnp-card);display:flex;flex-direction:column;gap:7px}
@@ -144,7 +144,7 @@
         el.style.setProperty('display', 'none', 'important');
       }));
     } else {
-      focusHidden.forEach(({el, display}) => { if (el?.isConnected) { el.style.display = display; el.style.removeProperty('display'); } });
+      focusHidden.forEach(({el, display}) => { if (el?.isConnected) { if (display) el.style.setProperty('display', display); else el.style.removeProperty('display'); } });
       focusHidden = [];
     }
   }
