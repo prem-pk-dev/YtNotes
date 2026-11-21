@@ -285,13 +285,16 @@
       resumeAfterSave = false;
       videoTitle = 'Open a YouTube video';
       if (textarea) textarea.value = '';
+      if (clockVideo && clockHandler) clockVideo.removeEventListener('timeupdate', clockHandler);
+      clockVideo = null;
+      clockHandler = null;
       if ($('#ytsnp-title')) $('#ytsnp-title').textContent = videoTitle;
       renderNotes();
       syncVisibility();
       applyFocusMode();
       return;
     }
-    if (next === videoId) { applyFocusMode(); return; }
+    if (next === videoId) { bindClock(); applyFocusMode(); return; }
     videoId = next;
     draftImage = '';
     resumeAfterSave = false;
