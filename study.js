@@ -261,7 +261,7 @@
 
   function toMarkdown() {
     if (!artifacts) return '';
-    return '# '+artifacts.title+'\n\n## Summary\n'+artifacts.summary.map(s=>'- ['+fmt(s.time)+'] '+s.text).join('\n')+'\n\n## Key points\n'+artifacts.keyPoints.map(s=>'- ['+fmt(s.time)+'] '+s.text).join('\n')+'\n\n## Chapters\n'+artifacts.chapters.map(c=>'- ['+fmt(c.time)+'] '+c.title).join('\n')+'\n\n## Quiz\n'+artifacts.quiz.map((q,i)=>(i+1)+'. '+q.question+'\n   Answer: '+q.answer).join('\n\n')+'\n\n## Flashcards\n'+artifacts.cards.map(c=>'- **'+c.front+'**\n  '+c.back).join('\n');
+    return '# '+artifacts.title+'\n\n## Summary\n'+artifacts.summary.map(s=>'- ['+fmt(s.time)+'] '+s.text).join('\n')+'\n\n## Key points\n'+artifacts.keyPoints.map(s=>'- ['+fmt(s.time)+'] '+s.text).join('\n')+'\n\n## Chapters\n'+artifacts.chapters.map(c=>'- ['+fmt(c.time)+'] '+c.title).join('\n')+'\n\n## Quiz\n'+artifacts.quiz.map((q,i)=>(i+1)+'. '+q.question+'\n   Answer: '+q.answer).join('\n\n')+'\n\n## Flashcards\n'+artifacts.cards.map(c=>'- **'+c.front+'**\n  '+c.back).join('\n')+'\n\n## Full transcript\n'+artifacts.transcript.map(t=>'['+fmt(t.time)+'] '+t.text).join('\n');
   }
   function toText() { return toMarkdown().replace(/^#+ /gm,'').replace(/\*\*/g,''); }
   function download(name,content,type) {
@@ -271,7 +271,7 @@
   function printPack() {
     if (!artifacts) return;
     const w=window.open('','_blank'); if(!w) return;
-    w.document.write('<!doctype html><meta charset="utf-8"><title>Study pack</title><style>body{font:15px/1.6 Arial;max-width:800px;margin:40px auto;color:#222}h1,h2{line-height:1.2}li{margin:8px 0}@media print{body{margin:15mm}}</style><h1>'+escapeHtml(artifacts.title)+'</h1><h2>Summary</h2><ul>'+artifacts.summary.map(s=>'<li><b>'+fmt(s.time)+'</b> '+escapeHtml(s.text)+'</li>').join('')+'</ul><h2>Key points</h2><ul>'+artifacts.keyPoints.map(s=>'<li><b>'+fmt(s.time)+'</b> '+escapeHtml(s.text)+'</li>').join('')+'</ul><h2>Chapters</h2><ul>'+artifacts.chapters.map(c=>'<li><b>'+fmt(c.time)+'</b> '+escapeHtml(c.title)+'</li>').join('')+'</ul><h2>Quiz</h2><ol>'+artifacts.quiz.map(q=>'<li>'+escapeHtml(q.question)+'<br><b>Answer:</b> '+escapeHtml(q.answer)+'</li>').join('')+'</ol><h2>Flashcards</h2><ul>'+artifacts.cards.map(c=>'<li><b>'+escapeHtml(c.front)+'</b><br>'+escapeHtml(c.back)+'</li>').join('')+'</ul><script>window.onload=()=>window.print()<\\/script>');
+    w.document.write('<!doctype html><meta charset="utf-8"><title>Study pack</title><style>body{font:15px/1.6 Arial;max-width:800px;margin:40px auto;color:#222}h1,h2{line-height:1.2}li{margin:8px 0}@media print{body{margin:15mm}}</style><h1>'+escapeHtml(artifacts.title)+'</h1><h2>Summary</h2><ul>'+artifacts.summary.map(s=>'<li><b>'+fmt(s.time)+'</b> '+escapeHtml(s.text)+'</li>').join('')+'</ul><h2>Key points</h2><ul>'+artifacts.keyPoints.map(s=>'<li><b>'+fmt(s.time)+'</b> '+escapeHtml(s.text)+'</li>').join('')+'</ul><h2>Chapters</h2><ul>'+artifacts.chapters.map(c=>'<li><b>'+fmt(c.time)+'</b> '+escapeHtml(c.title)+'</li>').join('')+'</ul><h2>Quiz</h2><ol>'+artifacts.quiz.map(q=>'<li>'+escapeHtml(q.question)+'<br><b>Answer:</b> '+escapeHtml(q.answer)+'</li>').join('')+'</ol><h2>Flashcards</h2><ul>'+artifacts.cards.map(c=>'<li><b>'+escapeHtml(c.front)+'</b><br>'+escapeHtml(c.back)+'</li>').join('')+'</ul><h2>Full transcript</h2><ol>'+artifacts.transcript.map(t=>'<li><b>'+fmt(t.time)+'</b> '+escapeHtml(t.text)+'</li>').join('')+'</ol><script>window.onload=()=>window.print()<\\/script>');
     w.document.close();
   }
 
