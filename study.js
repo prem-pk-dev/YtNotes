@@ -194,7 +194,26 @@
   }
 
   function drawTranscript(area) {
-    area.innerHTML = transcript.length ? '<div class="hint">Transcript segments captured from YouTube. Click a timestamp to jump to that point.</div><div class="list">' + transcript.map(s=>'<div class="point"><button class="btn" data-seek="' + s.time + '">' + fmt(s.time) + '</button><span>' + escapeHtml(s.text) + '</span></div>').join('') + '</div>' : '<div class="empty">No transcript loaded. Go to Study → Load transcript, or paste a transcript.</div>';
+    if (!transcript.length) {
+      area.innerHTML = '<div class="empty">No transcript loaded. Go to Study → Load transcript, or paste a transcript.</div>';
+      return;
+    }
+    const filtered = transcript.filter(s => !transcriptQuery || s.text.toLowerCase().includes(transcriptQuery));
+    const visible = filtered.slice(0, transcriptLimit);
+    area.innerHTML = '<div class="hint">Transcript segments: ' + transcript.length + '. Search and select a timestamp to jump to that point.</div>' +
+      '<input class="field" id="transcript-search" style="min-height:0" placeholder="Search transcript…" value="' + escapeHtml(transcriptQuery) + '">' +
+      '<div class="muted">Showing ' + visible.length + ' of ' + filtered.length + ' matching segments</div>' +
+      '<div class="list">' + visible.map(s=>'<div class="point"><button class="btn" data-seek="' + s.time + '">' + fmt(s.time) + '</button><span>' + escapeHtml(s.text) + '</span></div>').join('') + '</div>' +
+      (visible.length < filtered.length ? '<button class="btn" id="more-transcript">Load more transcript</button>' : '');
+    $('#transcript-search').addEventListener('input', e => {
+      transcriptQuery = e.target.value.toLowerCase().trim();
+      transcriptLimit = 150;
+      drawTranscript(area);
+      const input = $('#transcript-search');
+      input.focus();
+      input.setSelectionRange(input.value.length,input.value.length);
+    });
+    $('#more-transcript')?.addEventListener('click', () => { transcriptLimit += 150; drawTranscript(area); });
     area.querySelectorAll('[data-seek]').forEach(b=>b.addEventListener('click',()=>seek(Number(b.dataset.seek))));
   }
 
