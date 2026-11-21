@@ -203,8 +203,22 @@
   }
 
   async function saveArtifacts() {
-    try { const data=await chrome.storage.local.get([STORE]); const all=data[STORE]||{}; all[getId()]=artifacts; await chrome.storage.local.set({[STORE]:all}); }
-    catch(e) { console.warn('[YT Study Notes Pro] Study pack storage failed',e); }
+    const snapshot = artifacts;
+    const targetId = snapshot && snapshot.videoId;
+    if (!targetId) return false;
+    try {
+      const data = await chrome.storage.local.get([STORE]);
+      if (targetId !== videoId) return false;
+      const all = data[STORE] || {};
+      all[targetId] = snapshot;
+      await chrome.storage.local.set({[STORE]:all});
+      return true;
+    } catch(e) {
+      console.warn('[YT Study Notes Pro] Study pack storage failed',e);
+      const status = $('#status');
+      if (status) status.textContent = 'Could not save study pack. Check extension storage space.';
+      return false;
+    }
   }
 
   function seek(time) {
@@ -229,11 +243,17 @@
   }
 
   async function loadSavedPack() {
+    const requestedId = videoId;
     try {
       const data = await chrome.storage.local.get([STORE]);
-      artifacts = data[STORE]?.[videoId] || null;
+      if (requestedId !== videoId) return;
+      artifacts = data[STORE]?.[requestedId] || null;
       transcript = artifacts?.transcript || [];
-    } catch (e) { artifacts = null; transcript = []; }
+    } catch (e) {
+      if (requestedId !== videoId) return;
+      artifacts = null;
+      transcript = [];
+    }
     if (host && $('.dock')) { activeTab='overview'; drawTab(); }
   }
 
