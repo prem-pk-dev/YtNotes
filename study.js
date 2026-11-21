@@ -9,13 +9,13 @@
 
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const getId = () => { const url = new URL(location.href); if (url.pathname === '/watch') return url.searchParams.get('v') || ''; const match = url.pathname.match(/^\/(?:shorts|live|embed)\/([\\w-]{6,})/); return match ? match[1] : ''; };
+  const getId = () => { const url = new URL(location.href); if (url.pathname === '/watch') return url.searchParams.get('v') || ''; const match = url.pathname.match(/^\/(?:shorts|live|embed)\/([\w-]{6,})/); return match ? match[1] : ''; };
   const getTitle = () => document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim() || document.title.replace(/ - YouTube$/, '');
   const fmt = sec => {
     sec = Math.max(0, Math.floor(Number(sec) || 0));
     return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
   };
-  const words = text => (text.toLowerCase().match(/[\\p{L}\\p{N}][\\p{L}\\p{N}'’\\-]{2,}/gu) || []);
+  const words = text => (text.toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}'’\-]{2,}/gu) || []);
   const stop = new Set(('about after again against also among because before being between both could did does doing down during each few from further had has have having here how into itself just more most other our out over same should some such than that their them then there these they this those through under until very was were what when where which while who will with would your you video videos like make made using used use can could one two get got its his her she him he we us are and the for not but all any as at be by do if in is it of on or to an a i me my we aur hai hain tha thi theek kya ka ki ke ko se mein me par yah yeh wo vah aap hum unka unki unke ek aur lekin nahi nahin hai ho hain tha thi this that').split(' '));
 
   function ensureUI() {
