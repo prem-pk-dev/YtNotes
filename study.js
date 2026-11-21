@@ -118,17 +118,17 @@
     const rows = new Map();
     const parseTime = value => {
       const raw = String(value || '').trim();
-      if (/^\\d+(?:\\.\\d+)?$/.test(raw)) return Number(raw);
-      const m = raw.match(/(?:(\\d+):)?(\\d{1,2}):(\\d{2})/);
+      if (/^\d+(?:\.\d+)?$/.test(raw)) return Number(raw);
+      const m = raw.match(/(?:(\d+):)?(\d{1,2}):(\d{2})/);
       return m ? Number(m[1] || 0) * 3600 + Number(m[2]) * 60 + Number(m[3]) : 0;
     };
     nodes.forEach(node => {
-      const rawText = (node.querySelector('.segment-text, [class*="segment-text"]')?.textContent || node.textContent || '').replace(/\\s+/g, ' ').trim();
-      const prefixTime = rawText.match(/^\\d{1,2}:\\d{2}(?::\\d{2})?/);
+      const rawText = (node.querySelector('.segment-text, [class*="segment-text"]')?.textContent || node.textContent || '').replace(/\s+/g, ' ').trim();
+      const prefixTime = rawText.match(/^\d{1,2}:\d{2}(?::\d{2})?/);
       const timeText = node.querySelector('.segment-timestamp, [class*="timestamp"]')?.textContent ||
         node.getAttribute('start') || node.getAttribute('data-start') || (prefixTime && prefixTime[0]) || '';
       const time = parseTime(timeText);
-      const text = rawText.replace(/^\\d{1,2}:\\d{2}(?::\\d{2})?\\s*/, '').trim();
+      const text = rawText.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/, '').trim();
       if (text) rows.set(time + ':' + text, {time, text});
     });
     return Array.from(rows.values()).sort((a,b) => a.time - b.time);
