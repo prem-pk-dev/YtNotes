@@ -289,15 +289,22 @@
     if (host && $('.dock')) { activeTab='overview'; drawTab(); }
   }
 
+  function positionLegacyPanel() {
+    const legacy = document.getElementById('ytsnp-root');
+    if (legacy) legacy.style.right = host && host.style.display !== 'none' ? '410px' : '18px';
+  }
+
   function onNavigation() {
     const next = getId();
     if (!next) {
       if (host) host.style.display = 'none';
+      positionLegacyPanel();
       videoId = '';
       return;
     }
     if (next === videoId) {
       if (host) host.style.display = '';
+      positionLegacyPanel();
       return;
     }
     videoId = next;
@@ -306,20 +313,20 @@
     transcriptLimit = 150;
     transcriptQuery = '';
     if (!host) {
-      const legacy = document.getElementById('ytsnp-root');
-      if (legacy) legacy.style.right = '410px';
       ensureUI();
       render();
     } else {
       host.style.display = '';
       if ($('.dock')) { activeTab='overview'; drawTab(); }
     }
+    positionLegacyPanel();
     loadSavedPack();
   }
 
   function init() {
     let last = location.href;
     const checkNavigation = () => {
+      positionLegacyPanel();
       if (location.href !== last) { last = location.href; onNavigation(); }
     };
     new MutationObserver(checkNavigation).observe(document.documentElement,{subtree:true,childList:true});
