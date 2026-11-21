@@ -81,11 +81,21 @@
     $('#build').addEventListener('click', () => {
       const raw = $('#paste-area').value.trim();
       if (!raw) return;
-      transcript = raw.split(/\n+/).map((line, i) => {
-        const match = line.match(/^\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s+(.*)$/);
-        const time = match ? Number(match[1] || 0) * 3600 + Number(match[2]) * 60 + Number(match[3]) : i * 8;
-        return {time, text:(match ? match[4] : line).trim()};
-      }).filter(x => x.text);
+      const lines = raw.split(/\n+/).map(line => line.trim()).filter(Boolean);
+      transcript = [];
+      let pendingTime = null;
+      lines.forEach(line => {
+        const match = line.match(/^(?:(\d{1,2}):)?(\d{1,2}):(\d{2})(?:\s+(.*))?$/);
+        if (match) {
+          const time = Number(match[1] || 0) * 3600 + Number(match[2]) * 60 + Number(match[3]);
+          const text = (match[4] || '').trim();
+          if (text) transcript.push({time,text});
+          else pendingTime = time;
+        } else {
+          transcript.push({time:pendingTime === null ? transcript.length * 8 : pendingTime,text:line});
+          pendingTime = null;
+        }
+      });
       buildPack();
     });
     $('#back').addEventListener('click', () => { activeTab = 'overview'; drawTab(); });
