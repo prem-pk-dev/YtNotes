@@ -22,7 +22,8 @@
     if (host) return;
     host = document.createElement('div');
     host.id = 'ytsnp-study-root';
-    host.style.cssText = 'all:initial;position:fixed;z-index:2147483001;right:410px;bottom:18px;';
+    host.style.cssText = 'all:initial;position:fixed;z-index:2147483001;right:18px;bottom:18px;';
+s    = s;
     shadow = host.attachShadow({mode:'open'});
     const style = document.createElement('style');
     style.textContent = ':host{all:initial}*{box-sizing:border-box}.dock{font:13px Inter,Roboto,Arial,sans-serif;color:#f4f6f8;background:#15181d;border:1px solid #343a44;border-radius:16px;width:min(390px,92vw);max-height:78vh;display:flex;flex-direction:column;box-shadow:0 12px 42px #0009;overflow:hidden}.head{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#1d222a;border-bottom:1px solid #343a44}.brand{font-weight:800;flex:1}.sub{font-size:10px;color:#aab3c0;margin-top:3px}.close,.tab,.btn{cursor:pointer;border:1px solid #3b4654;background:#242b35;color:#f4f6f8;border-radius:8px;padding:7px 9px;font:600 11px inherit}.tabs{display:flex;gap:5px;padding:9px 10px;border-bottom:1px solid #343a44;flex-wrap:wrap}.tab[aria-selected=true]{background:#1269bd;border-color:#1269bd}.content{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px}.muted{color:#aab3c0}.hint{background:#202833;border:1px solid #394656;padding:10px;border-radius:9px;line-height:1.45}.actions{display:flex;gap:7px;flex-wrap:wrap}.btn.primary{background:#1473cc;border-color:#1473cc}.btn:disabled{opacity:.4;cursor:not-allowed}.card{border:1px solid #343a44;background:#1c222b;border-radius:10px;padding:10px;line-height:1.5}.card h3{font-size:13px;margin:0 0 6px}.card p{margin:0}.point{display:flex;gap:8px;align-items:flex-start}.time{color:#68b7ff;font:600 11px monospace;white-space:nowrap}.list{display:flex;flex-direction:column;gap:7px}.field{width:100%;min-height:115px;resize:vertical;background:#101419;color:#f4f6f8;border:1px solid #3b4654;border-radius:9px;padding:10px;font:12px/1.5 inherit}.q{font-weight:700;line-height:1.5}.option{display:block;width:100%;text-align:left;margin-top:6px;white-space:normal}.answer{color:#83d7a2;margin-top:8px}.fab{position:fixed;right:18px;bottom:18px;background:#1269bd;color:white;border:0;border-radius:30px;padding:11px 15px;font:700 12px Inter,Arial;box-shadow:0 6px 22px #0008;cursor:pointer}.empty{color:#b5bfcc;text-align:center;padding:16px 8px;line-height:1.5}@media(max-width:900px){#ytsnp-study-root{right:12px!important;bottom:76px!important}.dock{width:min(390px,94vw);max-height:70vh}}';
@@ -30,7 +31,7 @@
     const fab = document.createElement('button');
     fab.className = 'fab';
     fab.textContent = '✦ Study Assistant';
-    fab.addEventListener('click', () => { const dock = $('.dock'); if (dock) dock.hidden = !dock.hidden; else render(); });
+    fab.addEventListener('click', () => { const dock = $('.dock'); if (dock) { dock.hidden = false; fab.hidden = true; } else render(); });
     shadow.append(fab);
     document.documentElement.append(host);
   }
@@ -42,7 +43,8 @@
     dock.className = 'dock';
     dock.innerHTML = '<header class="head"><div class="brand">✦ Study Assistant<div class="sub">Transcript-based · Runs locally · No AI API</div></div><button class="close" id="close">×</button></header><nav class="tabs"><button class="tab" data-tab="overview">Study</button><button class="tab" data-tab="transcript">Transcript</button><button class="tab" data-tab="quiz">Quiz</button><button class="tab" data-tab="cards">Flashcards</button></nav><main class="content" id="content"></main>';
     shadow.insertBefore(dock, $('.fab'));
-    $('#close').addEventListener('click', () => dock.hidden = true);
+    $('.fab').hidden = true;
+    $('#close').addEventListener('click', () => { dock.hidden = true; $('.fab').hidden = false; });
     dock.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => { activeTab = b.dataset.tab; drawTab(); }));
     drawTab();
   }
@@ -130,10 +132,16 @@
     if (!transcript.length) return;
     const clean = transcript.map((s,i) => ({time:Number(s.time)||i*8,text:String(s.text||'').replace(/\s+/g,' ').trim()})).filter(s => s.text.length > 8);
     const sentences = [];
+    let buffer = '', bufferTime = 0;
     clean.forEach(seg => {
-      const pieces = seg.text.match(/[^.!?]+[.!?]?/g) || [seg.text];
-      pieces.forEach(piece => { const text = piece.trim(); if (text.length > 35) sentences.push({time:seg.time,text}); });
+      if (!buffer) bufferTime = seg.time;
+      buffer += (buffer ? ' ' : '') + seg.text;
+      if (/[.!?]$/.test(seg.text) || buffer.length >= 180) {
+        if (buffer.length > 35) sentences.push({time:bufferTime,text:buffer});
+        buffer = '';
+      }
     });
+    if (buffer.length > 35) sentences.push({time:bufferTime,text:buffer});
     const freq = new Map();
     words(clean.map(s=>s.text).join(' ')).forEach(w => { if (!stop.has(w)) freq.set(w,(freq.get(w)||0)+1); });
     const score = s => {
@@ -167,7 +175,7 @@
     const pool = Array.from(freq.entries()).filter(([w,n])=>w.length>3 && n>1).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
     return points.slice(0,8).map((p,i) => {
       const answer = pool.find(w=>p.text.toLowerCase().includes(w)) || words(p.text).find(w=>!stop.has(w)) || 'idea';
-      const distractors = pool.filter(w=>w!==answer).slice(i,i+3);
+      const distractors = pool.filter(w=>w!==answer && !p.text.toLowerCase().includes(w)).slice(i,i+3);
       while (distractors.length<3) distractors.push(['concept','process','result','method'][distractors.length]);
       return {question:'Which keyword best represents this point: “' + p.text.slice(0,115) + (p.text.length>115?'…':'') + '”?',options:[answer,...distractors].sort(()=>0.5-Math.random()),answer,time:p.time};
     });
@@ -221,16 +229,29 @@
     w.document.close();
   }
 
+  async function loadSavedPack() {
+    try {
+      const data = await chrome.storage.local.get([STORE]);
+      artifacts = data[STORE]?.[videoId] || null;
+      transcript = artifacts?.transcript || [];
+    } catch (e) { artifacts = null; transcript = []; }
+    if (host && $('.dock')) { activeTab='overview'; drawTab(); }
+  }
+
   function onNavigation() {
     const next=getId();
     if (!next || next===videoId) return;
     videoId=next; transcript=[]; artifacts=null;
-    if (host) { const dock=$('.dock'); if(dock) {activeTab='overview';drawTab();} }
+    if (host && $('.dock')) { activeTab='overview'; drawTab(); }
+    loadSavedPack();
   }
 
   function init() {
     if (!getId()) return;
-    videoId=getId(); ensureUI(); render();
+    videoId=getId();
+    const legacy = document.getElementById('ytsnp-root');
+    if (legacy) legacy.style.right = '410px';
+    ensureUI(); render(); loadSavedPack();
     let last=location.href;
     new MutationObserver(()=>{ if(location.href!==last){last=location.href;onNavigation();} }).observe(document.documentElement,{subtree:true,childList:true});
     window.addEventListener('yt-navigate-finish',onNavigation);
