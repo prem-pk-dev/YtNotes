@@ -242,7 +242,16 @@
     } catch (error) { console.warn('[YT Study Notes Pro] License validation failed:', error); return false; }
   }
   function bindClock() {
-    const video = currentVideo();\n    if (video && video !== clockVideo) {\n      clockVideo = video;\n      video.addEventListener('timeupdate', () => { const el = $('#ytsnp-time-label'); if (el) el.textContent = formatTime(video.currentTime); });\n    }\n  }\n  async function handleNavigation() {
+    const video = currentVideo();
+    if (video && video !== clockVideo) {
+      clockVideo = video;
+      video.addEventListener('timeupdate', () => {
+        const el = $('#ytsnp-time-label');
+        if (el) el.textContent = formatTime(video.currentTime);
+      });
+    }
+  }
+  async function handleNavigation() {
     const next = getVideoId();
     if (!next || next === videoId) { applyFocusMode(); return; }
     videoId = next; draftImage = ''; resumeAfterSave = false;
@@ -264,8 +273,7 @@
     videoId = getVideoId();
     if (videoId) await loadVideoNotes();
     else { videoTitle = 'Open a YouTube video'; $('#ytsnp-title').textContent = videoTitle; }
-    const video = currentVideo();
-    if (video) video.addEventListener('timeupdate', () => { const el = $('#ytsnp-time-label'); if (el) el.textContent = formatTime(video.currentTime); });
+    bindClock();
     document.addEventListener('yt-navigate-finish', handleNavigation);
     window.addEventListener('popstate', watchUrl);
     setInterval(watchUrl, 900);
