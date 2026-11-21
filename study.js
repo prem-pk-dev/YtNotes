@@ -9,7 +9,7 @@
 
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const getId = () => new URL(location.href).searchParams.get('v') || location.pathname.split('/')[2] || '';
+  const getId = () => { const url = new URL(location.href); if (url.pathname === '/watch') return url.searchParams.get('v') || ''; const match = url.pathname.match(/^\/(?:shorts|live|embed)\/([\\w-]{6,})/); return match ? match[1] : ''; };
   const getTitle = () => document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim() || document.title.replace(/ - YouTube$/, '');
   const fmt = sec => {
     sec = Math.max(0, Math.floor(Number(sec) || 0));
