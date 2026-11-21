@@ -110,7 +110,14 @@
     if (!rows.length) {
       const buttons = Array.from(document.querySelectorAll('button, ytd-button-renderer button, tp-yt-paper-button'));
       const trigger = buttons.find(b => /show transcript|transcript/i.test((b.getAttribute('aria-label') || '') + ' ' + (b.textContent || '')));
-      if (trigger) { trigger.click(); await wait(1100); rows = readSegments(); }
+      if (trigger) {
+        trigger.click();
+        for (let attempt = 0; attempt < 8 && !rows.length; attempt++) {
+          await wait(350);
+          if (id !== getId()) return;
+          rows = readSegments();
+        }
+      }
     }
     if (!rows.length) {
       status.textContent = 'Transcript not detected. Open the video description → Show transcript, then press Load transcript again. You can also use Paste transcript.';
