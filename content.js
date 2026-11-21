@@ -37,7 +37,7 @@
   };
   const storageGet = async keys => {
     try { return await chrome.storage.local.get(keys); }
-    catch (error) { console.error('[YT Study Notes Pro] Storage read failed:', error); notify('Storage unavailable. Check extension permissions.'); return {}; }
+    catch (error) { console.error('[YT Study Notes Pro] Storage read failed:', error); notify('Storage unavailable. Check extension permissions.'); return null; }
   };
   const storageSet = async data => {
     try { await chrome.storage.local.set(data); return true; }
@@ -45,6 +45,7 @@
   };
   const loadSettings = async () => {
     const data = await storageGet(['ytsnpSettings']);
+    if (!data) return;
     settings = { ...DEFAULTS, ...(data.ytsnpSettings || {}) };
   };
   const saveSettings = async patch => {
@@ -54,6 +55,7 @@
   };
   const loadVideoNotes = async () => {
     const data = await storageGet([STORE_KEY]);
+    if (!data) return;
     const all = data[STORE_KEY] || {};
     notes = Array.isArray(all[videoId]?.notes) ? all[videoId].notes : [];
     videoTitle = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim()
@@ -62,6 +64,7 @@
   };
   const persistNotes = async () => {
     const data = await storageGet([STORE_KEY]);
+    if (!data) return false;
     const all = data[STORE_KEY] || {};
     all[videoId] = { title: videoTitle, url: 'https://www.youtube.com/watch?v=' + encodeURIComponent(videoId), updatedAt: Date.now(), notes };
     return storageSet({ [STORE_KEY]: all });
