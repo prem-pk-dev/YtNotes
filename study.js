@@ -30,7 +30,7 @@
     const fab = document.createElement('button');
     fab.className = 'fab';
     fab.textContent = '✦ Study Assistant';
-    fab.addEventListener('click', () => { const dock = $('.dock'); if (dock) { dock.hidden = false; fab.hidden = true; } else render(); });
+    fab.addEventListener('click', () => { const dock = $('.dock'); if (dock) { dock.hidden = false; fab.hidden = true; positionLegacyPanel(); } else render(); });
     shadow.append(fab);
     document.documentElement.append(host);
   }
@@ -42,8 +42,9 @@
     dock.className = 'dock';
     dock.innerHTML = '<header class="head"><div class="brand">✦ Study Assistant<div class="sub">Transcript-based · Runs locally · No AI API</div></div><button class="close" id="close">×</button></header><nav class="tabs"><button class="tab" data-tab="overview">Study</button><button class="tab" data-tab="transcript">Transcript</button><button class="tab" data-tab="quiz">Quiz</button><button class="tab" data-tab="cards">Flashcards</button></nav><main class="content" id="content"></main>';
     shadow.insertBefore(dock, $('.fab'));
-    $('.fab').hidden = true;
-    $('#close').addEventListener('click', () => { dock.hidden = true; $('.fab').hidden = false; });
+    dock.hidden = true;
+    $('.fab').hidden = false;
+    $('#close').addEventListener('click', () => { dock.hidden = true; $('.fab').hidden = false; positionLegacyPanel(); });
     dock.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => { activeTab = b.dataset.tab; drawTab(); }));
     drawTab();
   }
@@ -292,7 +293,16 @@
 
   function positionLegacyPanel() {
     const legacy = document.getElementById('ytsnp-root');
-    if (legacy) legacy.style.right = host && host.style.display !== 'none' ? '410px' : '18px';
+    if (!legacy) return;
+    const dock = host ? $('.dock') : null;
+    const assistantOpen = !!(host && host.style.display !== 'none' && dock && !dock.hidden);
+    if (window.innerWidth < 850) {
+      legacy.style.visibility = assistantOpen ? 'hidden' : '';
+      legacy.style.right = '18px';
+    } else {
+      legacy.style.visibility = '';
+      legacy.style.right = assistantOpen ? '410px' : '18px';
+    }
   }
 
   function onNavigation() {
@@ -333,6 +343,7 @@
     new MutationObserver(checkNavigation).observe(document.documentElement,{subtree:true,childList:true});
     window.addEventListener('yt-navigate-finish',onNavigation);
     window.addEventListener('popstate',onNavigation);
+    window.addEventListener('resize',positionLegacyPanel);
     onNavigation();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
