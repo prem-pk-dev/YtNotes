@@ -233,14 +233,12 @@
     if (key === 'PRO-TEST-2026') return true;
     if (!key) return false;
     try {
-      const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
-        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ license_key: key, instance_name: 'YT Study Notes Pro' }).toString()
-      });
-      if (!response.ok) return false;
-      const data = await response.json();
-      return !!(data.valid && data.license_key?.status === 'active');
-    } catch (error) { console.warn('[YT Study Notes Pro] License validation failed:', error); return false; }
+      const result = await chrome.runtime.sendMessage({ type: 'YTSNP_VALIDATE_LICENSE', key });
+      return !!result?.valid;
+    } catch (error) {
+      console.warn('[YT Study Notes Pro] License validation failed:', error);
+      return false;
+    }
   }
   function bindClock() {
     const video = currentVideo();
