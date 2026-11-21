@@ -49,28 +49,31 @@
 
   const videos = data.ytsnpVideos || {};
   const packs = data.ytsnpStudyArtifacts || {};
-  const ids = new Set([...Object.keys(videos), ...Object.keys(packs)]);
+  const ids = new Set([...Object.entries(videos).filter(([, video]) => Array.isArray(video.notes) && video.notes.length).map(([id]) => id), ...Object.keys(packs)]);
   $('#videos').textContent = ids.size;
   $('#notes').textContent = Object.values(videos).reduce((count, video) =>
     count + (Array.isArray(video.notes) ? video.notes.length : 0), 0);
   $('#plan').textContent = settings.isPro ? '✦ PRO' : 'FREE';
 
-  const recentItems = [];
+  const recentMap = new Map();
   for (const [id, video] of Object.entries(videos)) {
     const noteCount = Array.isArray(video.notes) ? video.notes.length : 0;
-    if (noteCount) recentItems.push({
+    if (noteCount) recentMap.set(id, {
       id, title: video.title || 'YouTube video', subtitle: noteCount + ' notes',
-      updatedAt: video.updatedAt || 0, type: 'notes'
+      updatedAt: video.updatedAt || 0
     });
   }
   for (const [id, pack] of Object.entries(packs)) {
-    if (pack && (pack.summary?.length || pack.transcript?.length)) recentItems.push({
-      id, title: pack.title || 'YouTube video', subtitle: 'Study pack · ' +
-        (pack.transcript?.length || 0) + ' transcript segments',
-      updatedAt: pack.createdAt || 0, type: 'study'
+    if (!pack || !(pack.summary?.length || pack.transcript?.length)) continue;
+    const existing = recentMap.get(id);
+    const packLabel = 'Study pack · ' + (pack.transcript?.length || 0) + ' transcript segments';
+    recentMap.set(id, {
+      id, title: pack.title || existing?.title || 'YouTube video',
+      subtitle: existing ? existing.subtitle + ' · Study pack' : packLabel,
+      updatedAt: Math.max(existing?.updatedAt || 0, pack.createdAt || 0)
     });
   }
-  recentItems.sort((a, b) => b.updatedAt - a.updatedAt);
+  const recentItems = Array.from(recentMap.values()).sort((a,b) => b.updatedAt - a.updatedAt);
   const recent = $('#recent');
   if (recentItems.length) {
     recent.innerHTML = recentItems.slice(0, 6).map((item, index) =>
