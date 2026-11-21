@@ -203,10 +203,20 @@
   async function handleNoteAction(action, id) {
     const index = notes.findIndex(n => n.id === id); if (index < 0) return;
     if (action === 'seek') { const v = currentVideo(); if (v) { v.currentTime = notes[index].time; v.play().catch(() => {}); } return; }
-    if (action === 'delete') { if (!confirm('Delete this note?')) return; notes.splice(index,1); await persistNotes(); renderNotes(); return; }
+    if (action === 'delete') {
+      if (!confirm('Delete this note?')) return;
+      const [removed] = notes.splice(index,1);
+      if (!(await persistNotes())) notes.splice(index,0,removed);
+      renderNotes();
+      return;
+    }
     if (action === 'edit') {
-      const updated = prompt('Edit note', notes[index].text); if (updated === null) return;
-      notes[index].text = updated.trim(); await persistNotes(); renderNotes();
+      const updated = prompt('Edit note', notes[index].text);
+      if (updated === null) return;
+      const previous = notes[index].text;
+      notes[index].text = updated.trim();
+      if (!(await persistNotes())) notes[index].text = previous;
+      renderNotes();
     }
   }
   function markdownText() {
