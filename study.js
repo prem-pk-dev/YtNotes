@@ -77,7 +77,7 @@
 
   function showPaste() {
     const area = $('#content');
-    area.innerHTML = '<div class="hint">Paste transcript text below. Add timestamps like <b>00:12</b> at the start of lines if available.</div><textarea class="field" id="paste-area" placeholder="Paste YouTube transcript here..."></textarea><div class="actions"><button class="btn primary" id="build">Build study pack</button><button class="btn" id="back">Back</button></div>';
+    area.innerHTML = '<div class="hint">Paste transcript text below. Add timestamps like <b>00:12</b> at the start of lines for accurate jumps. Without timestamps, the tool estimates 8 seconds per line.</div><textarea class="field" id="paste-area" placeholder="Paste YouTube transcript here..."></textarea><div class="actions"><button class="btn primary" id="build">Build study pack</button><button class="btn" id="back">Back</button></div>';
     $('#build').addEventListener('click', () => {
       const raw = $('#paste-area').value.trim();
       if (!raw) return;
