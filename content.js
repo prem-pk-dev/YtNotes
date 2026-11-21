@@ -241,12 +241,14 @@
       return !!(data.valid && data.license_key?.status === 'active');
     } catch (error) { console.warn('[YT Study Notes Pro] License validation failed:', error); return false; }
   }
-  function bindClock() {\n    const video = currentVideo();\n    if (video && video !== clockVideo) {\n      clockVideo = video;\n      video.addEventListener('timeupdate', () => { const el = $('#ytsnp-time-label'); if (el) el.textContent = formatTime(video.currentTime); });\n    }\n  }\n  async function handleNavigation() {
+  function bindClock() {
+    const video = currentVideo();\n    if (video && video !== clockVideo) {\n      clockVideo = video;\n      video.addEventListener('timeupdate', () => { const el = $('#ytsnp-time-label'); if (el) el.textContent = formatTime(video.currentTime); });\n    }\n  }\n  async function handleNavigation() {
     const next = getVideoId();
     if (!next || next === videoId) { applyFocusMode(); return; }
     videoId = next; draftImage = ''; resumeAfterSave = false;
     if (textarea) textarea.value = '';
     await loadVideoNotes();
+    bindClock();
   }
   function watchUrl() {
     if (location.href !== lastUrl) { lastUrl = location.href; handleNavigation(); }
@@ -270,7 +272,8 @@
     document.addEventListener('fullscreenchange', syncVisibility);
     document.addEventListener('webkitfullscreenchange', syncVisibility);
     const observer = new MutationObserver(() => { if (settings.focusMode) applyFocusMode(); });
-    observer.observe(document.documentElement, { childList: true, subtree: true });\n    bindClock();
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    bindClock();
     syncVisibility();
   }
   init().catch(error => console.error('[YT Study Notes Pro] Initialization failed:', error));
