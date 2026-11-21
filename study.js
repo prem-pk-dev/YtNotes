@@ -5,7 +5,7 @@
 
   const STORE = 'ytsnpStudyArtifacts';
   const $ = (s, root = shadow) => root.querySelector(s);
-  let host, shadow, transcript = [], artifacts = null, videoId = '', activeTab = 'overview';
+  let host, shadow, transcript = [], artifacts = null, videoId = '', activeTab = 'overview', transcriptLimit = 150, transcriptQuery = '';
 
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -160,7 +160,11 @@
       if (candidate && (chapters.length === 0 || candidate.time - chapters[chapters.length-1].time > 35)) chapters.push({time:items[0].time,title:trimTitle(candidate.text)});
     }
     const quiz = makeQuiz(keyPoints, freq);
-    const cards = keyPoints.slice(0,12).map(p=>({front:'What is the key idea around ' + fmt(p.time) + '?',back:p.text,time:p.time}));
+    const cards = keyPoints.slice(0,12).map(p => {
+      const terms = words(p.text).filter(w => !stop.has(w)).sort((a,b) => (freq.get(b)||0) - (freq.get(a)||0));
+      const term = terms[0] || 'Key idea';
+      return {front:'Explain: ' + term,back:p.text,time:p.time};
+    });
     artifacts = {videoId:getId(),title:getTitle(),createdAt:Date.now(),summary,keyPoints,chapters,quiz,cards,transcript:clean};
     saveArtifacts().then(() => { activeTab='overview'; drawTab(); });
   }
@@ -174,9 +178,18 @@
     const pool = Array.from(freq.entries()).filter(([w,n])=>w.length>3 && n>1).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
     return points.slice(0,8).map((p,i) => {
       const answer = pool.find(w=>p.text.toLowerCase().includes(w)) || words(p.text).find(w=>!stop.has(w)) || 'idea';
-      const distractors = pool.filter(w=>w!==answer && !p.text.toLowerCase().includes(w)).slice(i,i+3);
-      while (distractors.length<3) distractors.push(['concept','process','result','method'][distractors.length]);
-      return {question:'Which keyword best represents this point: “' + p.text.slice(0,115) + (p.text.length>115?'…':'') + '”?',options:[answer,...distractors].sort(()=>0.5-Math.random()),answer,time:p.time};
+      const distractors = [];
+      for (const word of pool) {
+        if (word !== answer && !p.text.toLowerCase().includes(word) && !distractors.includes(word)) distractors.push(word);
+        if (distractors.length === 3) break;
+      }
+      const fallbacks = ['concept','process','result','method','example','principle'];
+      for (const word of fallbacks) {
+        if (distractors.length === 3) break;
+        if (word !== answer && !distractors.includes(word)) distractors.push(word);
+      }
+      const options = [answer,...distractors].sort((a,b)=>a.localeCompare(b));
+      return {question:'Which keyword is explicitly present in this transcript excerpt: “' + p.text.slice(0,115) + (p.text.length>115?'…':'') + '”?',options,answer,time:p.time};
     });
   }
 
