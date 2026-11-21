@@ -49,17 +49,25 @@
     settings = { ...DEFAULTS, ...(data.ytsnpSettings || {}) };
   };
   const saveSettings = async patch => {
-    settings = { ...settings, ...patch };
-    await storageSet({ ytsnpSettings: settings });
+    const next = { ...settings, ...patch };
+    if (!(await storageSet({ ytsnpSettings: next }))) return false;
+    settings = next;
     applySettings();
+    return true;
   };
   const loadVideoNotes = async () => {
     const data = await storageGet([STORE_KEY]);
-    if (!data) return;
+    const title = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim()
+      || document.querySelector('h1.title')?.textContent?.trim() || document.title.replace(/ - YouTube$/, '') || 'YouTube video';
+    videoTitle = title;
+    if (!data) {
+      // Never leave the previous video's notes visible after a storage read failure.
+      notes = [];
+      renderNotes();
+      return;
+    }
     const all = data[STORE_KEY] || {};
     notes = Array.isArray(all[videoId]?.notes) ? all[videoId].notes : [];
-    videoTitle = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim()
-      || document.querySelector('h1.title')?.textContent?.trim() || document.title.replace(/ - YouTube$/, '') || 'YouTube video';
     renderNotes();
   };
   const persistNotes = async () => {
